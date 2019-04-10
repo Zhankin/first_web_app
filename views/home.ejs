@@ -1,0 +1,138 @@
+<% if (!user) { %>
+        <!doctype html>
+		<html lang="en">
+		  <head>
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+			<title>Alma-Cup</title>
+		  </head>
+		  <body>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			  <div class="container">
+				<a class="navbar-brand" href="/">alma-cup</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+				  <span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+				  <div class="navbar-nav">
+					  <a class="nav-item nav-link" href="/login">Log in</a>
+				  </div>
+				</div>
+			  </div>
+			</nav>
+			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+		  </body>
+		</html>
+<% } else { %>
+		<html lang="en">
+		  <head>
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+			<title>Alma-Cup</title>
+		  </head>
+		  <body>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			  <div class="container">
+				<a class="navbar-brand" href="/">alma-cup</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+				  <span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+				  <div class="navbar-nav">
+					  <a class="nav-item nav-link" href="/logout">Log out</a>
+				  </div>
+				</div>
+			  </div>
+			</nav>
+			<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+			<script src="/socket.io/socket.io.js"></script>
+			
+      <% if (user.userType=='admin') { %>
+				<h1 class="text-center">Hi admin <%= user.username %>!</h1>
+        <form style="text-align:center;margin:50px 0">
+          <label for="name">1 Command Name:</label>
+          <input type="text" id="command1_name" />
+          <label for="message">1 Command Score:</label>
+          <input type="text" id="command1_score" />
+
+          <label for="name">2 Command Name:</label>
+          <input type="text" id="command2_name" />
+          <label for="message">2 Command Score:</label>
+          <input type="text" id="command2_score" />
+          <button type="submit">Send</button>
+        </form>
+
+
+        <script>
+          (function() {
+              var message = {}
+              var socket = io();
+              var form = document.querySelector('form');
+              form.addEventListener('submit', function(e) {
+                  e.preventDefault();
+                  var command1_name = e.target.querySelector('#command1_name');
+                  var command1_score = e.target.querySelector('#command1_score');
+                  var command2_name = e.target.querySelector('#command2_name');
+                  var command2_score = e.target.querySelector('#command2_score');
+                  var data = {
+                      command1_name: command1_name.value,
+                      command1_score: command1_score.value,
+                      command2_name: command2_name.value,
+                      command2_score: command2_score.value
+                  };
+                  socket.emit('/update', data);
+                  e.target.reset();
+              });
+              socket.on('/update', function(data) {
+                var messages = document.querySelector('#score1');
+                message[data.id]={"data.command1_name":data.command1_name,"data.command1_score":data.command1_score,"data.command2_score":data.command2_score,"data.command2_name":data.command2_name}
+                  var final_message=''
+                  for (var key in message) {
+                          if (final_message=='') {
+                                  final_message=message[key]["data.command1_name"] + ' <b>' + message[key]["data.command1_score"] + ' - ' + message[key]["data.command2_score"] + ' </b> ' + message[key]["data.command2_name"]
+                          } else {
+                                  final_message=final_message+'<br>'+message[key]["data.command1_name"] + ' <b>' + message[key]["data.command1_score"] + ' - ' + message[key]["data.command2_score"] + ' </b> ' + message[key]["data.command2_name"]
+                          }
+                  }
+                  messages.innerHTML = final_message;
+              });
+          })();
+        </script>
+			<% } else { %>
+				<h1 class="text-center">Hi common <%= user.username %>!</h1>
+        <script>
+          (function() {
+              var message = {}
+              var socket = io();
+              socket.on('/update', function(data) {
+                var messages = document.querySelector('#score1');
+                message[data.id]={"data.command1_name":data.command1_name,"data.command1_score":data.command1_score,"data.command2_score":data.command2_score,"data.command2_name":data.command2_name}
+                  var final_message=''
+                  for (var key in message) {
+                          if (final_message=='') {
+                                  final_message=message[key]["data.command1_name"] + ' <b>' + message[key]["data.command1_score"] + ' - ' + message[key]["data.command2_score"] + ' </b> ' + message[key]["data.command2_name"]
+                          } else {
+                                  final_message=final_message+'<br>'+message[key]["data.command1_name"] + ' <b>' + message[key]["data.command1_score"] + ' - ' + message[key]["data.command2_score"] + ' </b> ' + message[key]["data.command2_name"]
+                          }
+                  }
+                  messages.innerHTML = final_message;
+              });
+          })();
+        </script>
+			<% } %>
+
+			<h1 class="text-center">Hi <%= user.username %>!</h1>
+			<fieldset style="padding: 20px;width:50%;margin:0 auto">
+				<legend style="text-align:center">Table Score</legend>
+				<p id="score1"></p>
+			</fieldset>
+		  </body>
+		</html>
+<% } %>
+
