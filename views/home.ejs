@@ -52,44 +52,91 @@
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 			<script src="/socket.io/socket.io.js"></script>
-			
-      <% if (user.userType=='admin') { %>
-				<h1 class="text-center">Hi admin <%= user.username %>!</h1>
-        <form style="text-align:center;margin:50px 0">
-          <label for="name">1 Command Name:</label>
-          <input type="text" id="command1_name" />
-          <label for="message">1 Command Score:</label>
-          <input type="text" id="command1_score" />
 
-          <label for="name">2 Command Name:</label>
+      <% if (user.userType=='admin') { %>
+				<!-- <h1 class="text-center">Hi admin <%= user.username %>!</h1> -->
+        <!-- <h1 class="text-center">Hi admin <%= user.username %>!</h1> -->
+        <form style="text-align:center;margin:50px 0">
+          <label for="name">Name:</label>
+          <input type="text" id="command1_name" />
+          <label for="message">Score:</label>
+          <input class="input-group-field" id="command1_score" type="number" name="quantity" >
+          <br>
+          <label for="name">Name:</label>
           <input type="text" id="command2_name" />
-          <label for="message">2 Command Score:</label>
-          <input type="text" id="command2_score" />
-          <button type="submit">Send</button>
+          <label for="message">Score:</label>
+          <input class="input-group-field" id="command2_score" type="number" name="quantity" >
+          <br>
+          <button type='submit' id='btn1'>Update</button>
+          <button type='submit' id='btn2'>Start Match</button>
+          <button type='submit' id='btn3'>End Match</button>
+
         </form>
 
 
         <script>
+
           (function() {
               var message = {}
               var socket = io();
               var form = document.querySelector('form');
+              document.getElementById('btn1').onclick = function() {
+
+                    var command1_name = document.getElementById("command1_name");
+                    var command1_score = document.getElementById("command1_score");
+                    var command2_name = document.getElementById("command2_name");
+                    var command2_score = document.getElementById("command2_score");
+                    var data = {
+                        command1_name: command1_name.value,
+                        command1_score: command1_score.value,
+                        command2_name: command2_name.value,
+                        command2_score: command2_score.value
+                    };
+                    socket.emit('/update', data);
+              };
+              document.getElementById('btn2').onclick = function() {
+                    var command1_name = document.getElementById("command1_name");
+                    var command1_score = document.getElementById("command1_score");
+                    var command2_name = document.getElementById("command2_name");
+                    var command2_score = document.getElementById("command2_score");
+                    var data = {
+                        command1_name: command1_name.value,
+                        command1_score: command1_score.value,
+                        command2_name: command2_name.value,
+                        command2_score: command2_score.value
+                    };
+                    socket.emit('/start_match', data);
+              };
               form.addEventListener('submit', function(e) {
                   e.preventDefault();
-                  var command1_name = e.target.querySelector('#command1_name');
-                  var command1_score = e.target.querySelector('#command1_score');
-                  var command2_name = e.target.querySelector('#command2_name');
-                  var command2_score = e.target.querySelector('#command2_score');
-                  var data = {
-                      command1_name: command1_name.value,
-                      command1_score: command1_score.value,
-                      command2_name: command2_name.value,
-                      command2_score: command2_score.value
-                  };
-                  socket.emit('/update', data);
-                  e.target.reset();
+
               });
+
               socket.on('/update', function(data) {
+
+                var messages = document.querySelector('#score1');
+                message[data.id]={"data":data}
+                  var final_message=''
+                  for (var key in message) {
+
+                          if (final_message=='') {
+                                  final_message='<b>'+ message[key]["data"]["player1"]["full_name"] +
+                                                " - " +
+                                                message[key]["data"]["player2"]["full_name"] +
+                                                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Счет:" +
+                                                message[key]["data"]["scores"]["total_score"] +'</b>'
+                          } else {
+                                  final_message=final_message+'<b>'+ message[key]["data"]["player1"]["full_name"] +
+                                                " - " +
+                                                message[key]["data"]["player2"]["full_name"] +
+                                                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Счет:" +
+                                                message[key]["data"]["scores"]["total_score"] +'</b>' 
+                          }
+                  }
+                  messages.innerHTML = final_message;
+              });
+              socket.on('/start_match', function(data) {
+
                 var messages = document.querySelector('#score1');
                 message[data.id]={"data.command1_name":data.command1_name,"data.command1_score":data.command1_score,"data.command2_score":data.command2_score,"data.command2_name":data.command2_name}
                   var final_message=''
@@ -105,7 +152,7 @@
           })();
         </script>
 			<% } else { %>
-				<h1 class="text-center">Hi common <%= user.username %>!</h1>
+				<!--  <h1 class="text-center">Hi common <%= user.username %>!</h1> -->
         <script>
           (function() {
               var message = {}
@@ -115,6 +162,7 @@
                 message[data.id]={"data.command1_name":data.command1_name,"data.command1_score":data.command1_score,"data.command2_score":data.command2_score,"data.command2_name":data.command2_name}
                   var final_message=''
                   for (var key in message) {
+
                           if (final_message=='') {
                                   final_message=message[key]["data.command1_name"] + ' <b>' + message[key]["data.command1_score"] + ' - ' + message[key]["data.command2_score"] + ' </b> ' + message[key]["data.command2_name"]
                           } else {
@@ -127,7 +175,7 @@
         </script>
 			<% } %>
 
-			<h1 class="text-center">Hi <%= user.username %>!</h1>
+				<!-- <h1 class="text-center">Hi <%= user.username %>!</h1> -->
 			<fieldset style="padding: 20px;width:50%;margin:0 auto">
 				<legend style="text-align:center">Table Score</legend>
 				<p id="score1"></p>
@@ -135,4 +183,3 @@
 		  </body>
 		</html>
 <% } %>
-
